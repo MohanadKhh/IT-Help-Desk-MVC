@@ -1,0 +1,81 @@
+﻿@model IEnumerable<TicketDto>
+
+@{
+    ViewData["Title"] = "Tickets";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">All Tickets</h4>
+    <a asp-controller="Tickets" asp-action="Create" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg"></i> New Ticket
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Created By</th>
+                    <th>Assigned To</th>
+                    <th>Created</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var ticket in Model)
+                {
+                    <tr>
+                        <td class="text-muted small">@ticket.TicketId</td>
+                        <td>@ticket.Title</td>
+                        <td>@ticket.CategoryName</td>
+                        <td>
+                            <span class="badge bg-@GetPriorityColor(ticket.Priority)">
+                                @ticket.Priority
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-@GetStatusColor(ticket.Status.ToString())">
+                                @ticket.Status
+                            </span>
+                        </td>
+                        <td>@ticket.CreatedByName</td>
+                        <td>@(ticket.AssignedToName ?? "Unassigned")</td>
+                        <td class="text-muted small">
+                            @ticket.CreatedAt.ToString("dd MMM yyyy")
+                        </td>
+                        <td>
+                            <a asp-controller="Tickets" asp-action="Details" asp-route-id="@ticket.TicketId"
+                               class="btn btn-sm btn-outline-secondary">View Details</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@functions {
+    string GetPriorityColor(string p) => p switch
+    {
+        "Critical" => "danger",
+        "High" => "warning",
+        "Medium" => "info",
+        _ => "secondary"
+    };
+
+    string GetStatusColor(string s) => s switch
+    {
+        "Open" => "primary",
+        "InProgress" => "warning",
+        "Resolved" => "success",
+        "Closed" => "secondary",
+        _ => "light"
+    };
+}

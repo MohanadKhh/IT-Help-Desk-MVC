@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Email Confirmation Failed";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-body text-center">
+
+            <h2 class="text-danger mb-3">
+                ✗ Confirmation Failed
+            </h2>
+
+            <p class="lead">
+                The email confirmation link is invalid or has expired.
+            </p>
+
+            <p>
+                Please request a new confirmation email.
+            </p>
+
+            <a asp-controller="Account"
+               asp-action="Login"
+               class="btn btn-secondary mt-3">
+                Back to Login
+            </a>
+
+        </div>
+    </div>
+</div>

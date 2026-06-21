@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Email Confirmed";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-body text-center">
+
+            <h2 class="text-success mb-3">
+                ✓ Email Confirmed
+            </h2>
+
+            <p class="lead">
+                Your email has been successfully verified.
+            </p>
+
+            <p>
+                You can now log in to your IT Help Desk account.
+            </p>
+
+            <a asp-controller="Account"
+               asp-action="Login"
+               class="btn btn-primary mt-3">
+                Go to Login
+            </a>
+
+        </div>
+    </div>
+</div>

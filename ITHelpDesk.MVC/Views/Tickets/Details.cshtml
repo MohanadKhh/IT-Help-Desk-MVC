@@ -1,0 +1,137 @@
+﻿@model TicketDto
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-white d-flex justify-content-between">
+                <h5 class="mb-0">@Model.Title</h5>
+                <a asp-controller="Tickets" asp-action="Edit" asp-route-id="@Model.TicketId"
+                   class="btn btn-sm btn-outline-primary">Edit</a>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">@Model.Description</p>
+                <hr />
+                <div class="row g-3">
+                    <div class="col-6">
+                        <small class="text-muted d-block">Status</small>
+                        <strong class="badge bg-@GetStatusColor(Model.Status.ToString())">
+                            @Model.Status
+                        </strong>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted d-block">Priority</small>
+                        <strong class="badge bg-@GetPriorityColor(Model.Priority)">
+                            @Model.Priority
+                        </strong>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted d-block">Category</small>
+                        <strong>@Model.CategoryName</strong>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted d-block">Assigned To</small>
+                        <strong>@(Model.AssignedToName ?? "Unassigned")</strong>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted d-block">Created By</small>
+                        <strong>@Model.CreatedByName</strong>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted d-block">Created</small>
+                        <strong>@Model.CreatedAt.ToString("dd MMM yyyy HH:mm")</strong>
+                    </div>
+
+                    <div class="col-6">
+                        <small class="text-muted d-block">Updated</small>
+                        <strong>@(Model.UpdatedAt.ToString("dd MMM yyyy HH:mm") ?? "Not updated")</strong>
+                    </div>
+
+                    <div class="col-6">
+                        <small class="text-muted d-block">Resolved</small>
+                        <strong>@(Model.ResolvedAt?.ToString("dd MMM yyyy HH:mm") ?? "Not resolved")</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @{
+            ViewData["TicketId"] = Model.TicketId;
+        }
+        @await Html.PartialAsync("_CommentsPartial", Model.Comments)
+
+        @*       <!-- Comments -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h6 class="mb-0">Comments</h6>
+            </div>
+            <div class="card-body">
+                @if (Model.Comments.Any())
+                {
+                    @foreach (var c in Model.Comments)
+                    {
+                        <div class="border-bottom pb-3 mb-3">
+                            <div class="d-flex justify-content-between">
+                                <strong class="small">@c.CreatedByName</strong>
+                                <span class="text-muted small">
+                                    @c.CreatedAt.ToString("dd MMM yyyy")
+                                </span>
+                            </div>
+                            <p class="mb-0 mt-1">@c.Content</p>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted small mb-0">No comments yet.</p>
+                }
+            </div>
+        </div>
+    </div> *@
+
+        @* <!-- Sidebar: History -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h6 class="mb-0">History</h6>
+            </div>
+            <ul class="list-group list-group-flush">
+                @foreach (var h in Model.History)
+                {
+                    <li class="list-group-item small">
+                        <span class="text-muted">@h.ChangedAt.ToString("dd MMM")</span>
+                        <span class="ms-2">
+                            <strong>@h.FieldChanged</strong>
+                            changed from
+                            <em>@h.OldValue</em> →
+                            <strong>@h.NewValue</strong>
+                        </span>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div> *@
+    </div>
+
+
+@functions {
+    string GetPriorityColor(string p) => p switch
+    {
+        "Critical" => "danger",
+        "High" => "warning",
+        "Medium" => "info",
+        _ => "secondary"
+    };
+
+    string GetStatusColor(string s) => s switch
+    {
+        "Open" => "primary",
+        "InProgress" => "warning",
+        "Resolved" => "success",
+        "Closed" => "secondary",
+        _ => "light"
+    };
+}
