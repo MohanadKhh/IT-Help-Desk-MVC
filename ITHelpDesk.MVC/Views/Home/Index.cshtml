@@ -2,7 +2,171 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="py-5 px-4 text-center" style="background:#0C447C">
+    <h1 class="display-5 fw-semibold text-white mb-3">
+        IT Help Desk
+    </h1>
+
+    <p class="fs-5 text-white-50 mx-auto mb-4 w-50" style="color:#B5D4F4;">
+        Fast, reliable technical support for your organization.
+        Submit a ticket, track progress, received emails, and get back to work.
+    </p>
+
+    <div class="d-flex justify-content-center flex-wrap gap-3">
+        <a asp-controller="Tickets"
+           asp-action="Create"
+           class="btn btn-light fw-semibold px-4 py-2" style="background:#fff; color:#0C447C;">
+            Submit a ticket
+        </a>
+
+        <a asp-controller="Tickets"
+           asp-action="Index"
+           class="btn btn-outline-light px-4 py-2" style="background:transparent; color:#fff;">
+            Track my tickets
+        </a>
+    </div>
 </div>
+
+
+@* @{
+    ViewData["Title"] = "IT Help Desk";
+}
+
+<!-- Hero -->
+<div style="background:#0C447C; padding:5rem 2rem; text-align:center;">
+    <h1 style="font-size:2.4rem; font-weight:600; color:#fff; margin-bottom:1rem;">IT Help Desk</h1>
+    <p style="font-size:1.1rem; color:#B5D4F4; max-width:540px; margin:0 auto 2rem;">
+        Fast, reliable technical support for your organization.
+        Submit a ticket, track progress, and get back to work.
+    </p>
+    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <a asp-controller="Tickets" asp-action="Create"
+           style="background:#fff; color:#0C447C; padding:12px 28px; border-radius:8px;
+            font-weight:600; text-decoration:none; font-size:15px;">
+            Submit a ticket
+        </a>
+        <a asp-controller="Tickets" asp-action="Index"
+           style="background:transparent; color:#fff; border:1.5px solid #B5D4F4;
+            padding:12px 28px; border-radius:8px; text-decoration:none; font-size:15px;">
+            Track my ticket
+        </a>
+    </div>
+</div>
+
+<!-- Stats bar -->
+<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+    border-bottom:1px solid #e5e7eb;">
+    @foreach (var stat in new[] {
+        new { Num = "98%",  Label = "Satisfaction rate" },
+        new { Num = "2h",   Label = "Avg. response time" },
+        new { Num = "24/7", Label = "Support available" },
+        new { Num = "500+", Label = "Issues resolved/month" }
+    })
+    {
+        <div style="padding:1.5rem 1rem; text-align:center; border-right:1px solid #e5e7eb;">
+            <div style="font-size:1.8rem; font-weight:600; color:#185FA5;">@stat.Num</div>
+            <div style="font-size:13px; color:#6b7280; margin-top:4px;">@stat.Label</div>
+        </div>
+    }
+</div>
+
+<!-- Services -->
+<div style="padding:3.5rem 2rem;">
+    <p style="font-size:12px; font-weight:600; letter-spacing:.06em; color:#6b7280;
+    text-transform:uppercase; margin-bottom:1.5rem;">Services</p>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px;">
+
+        @{
+            var services = new[] {
+                new { Icon = "ti-device-laptop", Title = "Hardware support",
+                      Desc = "Laptop, desktop, printer, and peripheral repairs and replacements." },
+                new { Icon = "ti-wifi",          Title = "Network and connectivity",
+                      Desc = "VPN setup, Wi-Fi troubleshooting, and network access issues." },
+                new { Icon = "ti-lock",          Title = "Account and access",
+                      Desc = "Password resets, account unlocks, and permissions management." },
+                new { Icon = "ti-apps",          Title = "Software and apps",
+                      Desc = "Installation, licensing, updates, and software troubleshooting." },
+            };
+        }
+
+        @foreach (var svc in services)
+        {
+            <div style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:1.25rem;">
+                <div style="width:40px; height:40px; background:#E6F1FB; border-radius:8px;
+                    display:flex; align-items:center; justify-content:center; margin-bottom:12px;">
+                    <i class="ti @svc.Icon" style="font-size:20px; color:#185FA5;"></i>
+                </div>
+                <h3 style="font-size:15px; font-weight:600; margin-bottom:6px;">@svc.Title</h3>
+                <p style="font-size:13px; color:#6b7280; line-height:1.6;">@svc.Desc</p>
+                <a asp-controller="Tickets" asp-action="Create"
+                   style="font-size:13px; color:#185FA5; margin-top:10px; display:inline-block;
+                    text-decoration:none;">
+                    Submit request &rarr;
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- How it works -->
+<div style="background:#f9fafb; padding:3.5rem 2rem;">
+    <p style="font-size:12px; font-weight:600; letter-spacing:.06em; color:#6b7280;
+    text-transform:uppercase; margin-bottom:1.5rem;">How it works</p>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:16px;">
+
+        @{
+            var steps = new[] {
+                new { N = "1", Title = "Submit a ticket",
+                      Desc = "Describe your issue and choose a category. Takes less than 2 minutes." },
+                new { N = "2", Title = "We assign an agent",
+                      Desc = "Your ticket is routed to the right technician based on priority." },
+                new { N = "3", Title = "Track progress",
+                      Desc = "Get email updates and check your ticket status anytime." },
+                new { N = "4", Title = "Issue resolved",
+                      Desc = "We confirm the fix and ask for your feedback to keep improving." },
+            };
+        }
+
+        @foreach (var step in steps)
+        {
+            <div style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:1.25rem;">
+                <div style="width:26px; height:26px; background:#E6F1FB; border-radius:50%;
+                    display:flex; align-items:center; justify-content:center;
+                    font-size:12px; font-weight:600; color:#185FA5; margin-bottom:10px;">
+                    @step.N
+                </div>
+                <h3 style="font-size:14px; font-weight:600; margin-bottom:6px;">@step.Title</h3>
+                <p style="font-size:13px; color:#6b7280; line-height:1.6;">@step.Desc</p>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Contact -->
+<div style="padding:3.5rem 2rem; text-align:center; border-top:1px solid #e5e7eb;">
+    <h2 style="font-size:1.3rem; font-weight:600; margin-bottom:.5rem;">Need immediate help?</h2>
+    <p style="color:#6b7280; margin-bottom:1.5rem; font-size:15px;">
+        For urgent issues, reach us directly through one of these channels.
+    </p>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+        gap:12px; max-width:650px; margin:0 auto;">
+
+        @{
+            var contacts = new[] {
+                new { Icon = "ti-phone",   Label = "Phone",    Value = "+1 (800) 555-0100" },
+                new { Icon = "ti-mail",    Label = "Email",    Value = "helpdesk@company.com" },
+                new { Icon = "ti-message", Label = "Live chat", Value = "8am – 8pm" },
+                new { Icon = "ti-map-pin", Label = "Walk-in",  Value = "Room 101, IT Building" },
+            };
+        }
+
+        @foreach (var c in contacts)
+        {
+            <div style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:1rem;">
+                <i class="ti @c.Icon" style="font-size:22px; color:#185FA5; display:block; margin-bottom:8px;"></i>
+                <span style="font-size:12px; color:#6b7280; display:block; margin-bottom:4px;">@c.Label</span>
+                <strong style="font-size:14px;">@c.Value</strong>
+            </div>
+        }
+    </div>
+</div> *@
