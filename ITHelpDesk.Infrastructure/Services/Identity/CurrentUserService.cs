@@ -1,4 +1,4 @@
-﻿using ITHelpDesk.Application.Interfaces.Identity;
+using ITHelpDesk.Application.Interfaces.Identity;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
@@ -29,5 +29,9 @@ namespace ITHelpDesk.Infrastructure.Services.Identity
         public bool IsAuthenticated =>
             _httpContextAccessor.HttpContext?.User
                 .Identity?.IsAuthenticated ?? false;
+
+        public bool IsAdmin =>
+            _httpContextAccessor.HttpContext?.User
+                .IsInRole("Admin") ?? false;
     }
 }

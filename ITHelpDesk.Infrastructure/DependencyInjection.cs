@@ -3,6 +3,7 @@ using ITHelpDesk.Application.Interfaces.Repositories;
 using ITHelpDesk.Application.Interfaces.UnitOfWork;
 using ITHelpDesk.Application.Settings;
 using ITHelpDesk.Infrastructure;
+using ITHelpDesk.Infrastructure.BackgroundJobs;
 using ITHelpDesk.Infrastructure.Data;
 using ITHelpDesk.Infrastructure.Identity;
 using ITHelpDesk.Infrastructure.Repositories;
@@ -59,6 +60,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<IEmailService, EmailService>();
+        services.AddHostedService<SlaBackgroundJob>();
 
         return services;
     }

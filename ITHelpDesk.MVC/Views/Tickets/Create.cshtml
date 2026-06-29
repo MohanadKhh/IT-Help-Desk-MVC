@@ -77,28 +77,40 @@
                             </label>
                             <select asp-for="Input.Priority" class="form-select">
                                 <option value="">-- Select Priority --</option>
-                                <option value="Low" class="badge bg-secondary">Low</option>
-                                <option value="Medium" class="badge bg-info">Medium</option>
-                                <option value="High" class="badge bg-warning">High</option>
-                                <option value="Critical" class="badge bg-danger">Critical</option>
+                                <option value="Low">🟢 Low</option>
+                                <option value="Medium">🟡 Medium</option>
+                                <option value="High">🟠 High</option>
+                                <option value="Critical">🔴 Critical</option>
                             </select>
                             <span asp-validation-for="Input.Priority"
                                   class="text-danger small"></span>
                         </div>
                     </div>
 
-                    <!-- Assign To -->
-                    <div class="mb-4">
-                        <label asp-for="Input.AssignedToId"
-                               class="form-label small fw-medium">
-                            Assign To
-                            <span class="text-muted fw-normal">(optional)</span>
-                        </label>
-                        <select asp-for="Input.AssignedToId"
-                                asp-items="Model.AssignableUsers"
-                                class="form-select">
-                            <option value="">-- Leave Unassigned --</option>
-                        </select>
+                    <!-- Assign To + DueDate -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Input.AssignedToId"
+                                   class="form-label small fw-medium">
+                                Assign To
+                                <span class="text-muted fw-normal">(optional)</span>
+                            </label>
+                            <select asp-for="Input.AssignedToId"
+                                    asp-items="Model.AssignableUsers"
+                                    class="form-select">
+                                <option value="">-- Leave Unassigned --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Input.DueDate" class="form-label small fw-medium">
+                                Due Date
+                                <span class="text-muted fw-normal">(SLA deadline)</span>
+                            </label>
+                            <input asp-for="Input.DueDate" type="datetime-local" class="form-control" />
+                            <span asp-validation-for="Input.DueDate"
+                                  class="text-danger small"></span>
+                        </div>
                     </div>
 
                     <!-- Actions -->

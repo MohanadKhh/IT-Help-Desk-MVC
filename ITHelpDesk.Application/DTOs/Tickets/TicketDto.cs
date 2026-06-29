@@ -1,5 +1,7 @@
 using ITHelpDesk.Application.DTOs.TicketComments;
+using ITHelpDesk.Application.DTOs.TicketHistories;
 using ITHelpDesk.Domain.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace ITHelpDesk.Application.DTOs.Tickets;
 
@@ -12,13 +14,15 @@ public record TicketDto(
     int CategoryId,
     string CategoryName,
     int CreatedById,
-    string CreatedByName,
+    string? CreatedByName,
     int? AssignedToId,
     string? AssignedToName,
+    DateTime DueDate,
     DateTime CreatedAt,
-    DateTime UpdatedAt,
+    DateTime? UpdatedAt,
     DateTime? ResolvedAt,
-    IEnumerable<TicketCommentDto>? Comments
+    List<TicketCommentDto>? Comments,
+    List<TicketHistoryDto>? Histories
 );
 
 public record CreateTicketDto(
@@ -26,7 +30,8 @@ public record CreateTicketDto(
     string Description,
     string Priority,
     int CategoryId,
-    int? AssignedToId
+    int? AssignedToId,
+    DateTime? DueDate
 );
 
 public record EditTicketDto(
@@ -36,5 +41,7 @@ public record EditTicketDto(
     TicketStatus Status,
     string Priority,
     int CategoryId,
-    int? AssignedToId
+    int? AssignedToId,
+    [property: DisplayFormat(DataFormatString = "{0:yyyy-MM-ddTHH:mm}", ApplyFormatInEditMode = true)]
+    DateTime DueDate
 );

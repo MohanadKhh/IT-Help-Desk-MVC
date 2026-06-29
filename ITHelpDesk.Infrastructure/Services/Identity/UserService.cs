@@ -47,5 +47,14 @@ namespace ITHelpDesk.Infrastructure
             var user = await _userManager.FindByIdAsync(userId.ToString());
             return user?.Email;
         }
+
+        public async Task<List<string>> GetAdminEmailsAsync()
+        {
+            var admins = await _userManager.GetUsersInRoleAsync("Admin");
+            return admins
+                .Where(u => !string.IsNullOrEmpty(u.Email))
+                .Select(u => u.Email!)
+                .ToList();
+        }
     }
 }

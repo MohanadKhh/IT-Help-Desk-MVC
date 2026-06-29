@@ -30,7 +30,7 @@ namespace ITHelpDesk.MVC
 
             //Add Services of Infrastructure Layer
             builder.Services.AddInfrastructure(builder.Configuration);
-            
+
             //Add Services of Application Layer
             builder.Services.AddApplication();
 
@@ -79,7 +79,7 @@ namespace ITHelpDesk.MVC
             app.UseAuthorization();
 
             app.MapStaticAssets();
-            
+
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}")

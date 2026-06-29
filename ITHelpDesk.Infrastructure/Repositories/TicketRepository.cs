@@ -1,5 +1,6 @@
 using ITHelpDesk.Application.Interfaces.Repositories;
 using ITHelpDesk.Domain.Entities;
+using ITHelpDesk.Domain.Enums;
 using ITHelpDesk.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,5 +26,16 @@ public class TicketRepository : Repository<Ticket, int>, ITicketRepository
             .Include(t => t.TicketComments)
             .Include(t => t.TicketHistories)
             .FirstOrDefaultAsync(t => t.TicketId == id);
+    }
+
+    public async Task<List<Ticket>> GetTicketsNeedingSlaCheckAsync()
+    {
+        return await _context.Tickets
+            .Where(t => (t.Status != TicketStatus.Resolved
+                     && t.Status != TicketStatus.Closed
+                     && (!t.WarningEmailSent || !t.BreachEmailSent))
+                     || (t.AssignedToId == null && !t.UnassignedReminderSent)
+                    )
+            .ToListAsync();
     }
 }

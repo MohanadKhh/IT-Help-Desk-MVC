@@ -1,7 +1,8 @@
-﻿using ITHelpDesk.Application.DTOs.TicketComments;
+using ITHelpDesk.Application.Common.Helpers;
+using ITHelpDesk.Application.DTOs.TicketComments;
 using ITHelpDesk.Application.Interfaces.Identity;
 using ITHelpDesk.Application.Interfaces.Services;
-using ITHelpDesk.Application.Services;
+using ITHelpDesk.MVC.Helpers;
 using ITHelpDesk.MVC.ViewModels.Tickets;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -39,14 +40,19 @@ namespace ITHelpDesk.MVC.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var result = await _ticketService.GetTicketByIdAsync(id);
-            if (!result.Success) return NotFound();
+            if (!result.Success)
+            {
+                TempData["Error"] = result.Message;
+                return RedirectToAction(nameof(Index));
+            }
             return View(result.Data);
         }
 
-        // DELETE /Tickets/Delete/5
-        [HttpDelete]
+        // POST /Tickets/Delete/5
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id) 
+        [Authorize(Policy = "UserOrAdmin")]
+        public async Task<IActionResult> Delete(int id)
         {
             var result = await _ticketService.DeleteTicketAsync(id);
 
@@ -92,6 +98,7 @@ namespace ITHelpDesk.MVC.Controllers
             var result = await _ticketService.CreateTicketAsync(vm.Input);
             if (!result.Success)
             {
+                ModelState.AddValidationErrors(result.Errors, "Input");
                 ModelState.AddModelError(string.Empty, result.Message);
                 await PopulateDropdownsAsync(vm);
                 return View(vm);
@@ -107,14 +114,21 @@ namespace ITHelpDesk.MVC.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var result = await _ticketService.GetTicketForEditAsync(id);
-            if (!result.Success) return NotFound();
+            if (!result.Success)
+            {
+                TempData["Error"] = result.Message;
+                return RedirectToAction(nameof(Details), new { id });
+            }
 
             var users = await _userService.GetAllUsersDropdownAsync();
             var categories = await _categoryService.GetCategoriesDropdownAsync();
 
             var vm = new TicketEditViewModel
             {
-                Input = result.Data,
+                Input = result.Data with
+                {
+                    DueDate = DateHelper.ToCairoDate(result.Data.DueDate)
+                },
                 Categories = categories.Select(u => new SelectListItem
                 {
                     Value = u.Id.ToString(),
@@ -126,6 +140,7 @@ namespace ITHelpDesk.MVC.Controllers
                     Text = u.DisplayName
                 }).ToList()
             };
+
             return View(vm);
         }
 
@@ -143,6 +158,7 @@ namespace ITHelpDesk.MVC.Controllers
             var result = await _ticketService.UpdateTicketAsync(vm.Input);
             if (!result.Success)
             {
+                ModelState.AddValidationErrors(result.Errors, "Input");
                 ModelState.AddModelError(string.Empty, result.Message);
                 await PopulateDropdownsAsync(vm);
                 return View(vm);

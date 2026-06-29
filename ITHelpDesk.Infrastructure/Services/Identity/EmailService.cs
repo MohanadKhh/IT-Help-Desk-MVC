@@ -18,7 +18,7 @@ public sealed class EmailService : IEmailService
         _logger = logger;
     }
 
-    public async Task SendEmailAsync(string toEmail, string subject, string htmlBody)
+    public async Task SendEmailAsync(string toEmail, string subject, string htmlBody, List<string>? ccEmails = null)
     {
         try
         {
@@ -31,6 +31,13 @@ public sealed class EmailService : IEmailService
                 from, to, subject,
                 plainTextContent: string.Empty,
                 htmlContent: htmlBody);
+
+            // Add CC recipients if provided
+            if (ccEmails is { Count: > 0 })
+            {
+                foreach (var cc in ccEmails)
+                    message.AddCc(new EmailAddress(cc));
+            }
 
             var response = await client.SendEmailAsync(message);
 

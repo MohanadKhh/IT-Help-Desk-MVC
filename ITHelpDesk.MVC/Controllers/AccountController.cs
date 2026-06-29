@@ -1,5 +1,6 @@
-﻿using ITHelpDesk.Application.DTOs.Authentications;
+using ITHelpDesk.Application.DTOs.Authentications;
 using ITHelpDesk.Application.Interfaces.Identity;
+using ITHelpDesk.MVC.Helpers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ITHelpDesk.MVC.Controllers
@@ -24,6 +25,7 @@ namespace ITHelpDesk.MVC.Controllers
             var result = await _authService.LoginAsync(dto);
             if (!result.Success)
             {
+                ModelState.AddValidationErrors(result.Errors);
                 ModelState.AddModelError(string.Empty, result.Message);
                 return View(dto);
             }
@@ -47,6 +49,7 @@ namespace ITHelpDesk.MVC.Controllers
             var result = await _authService.RegisterAsync(dto, confirmationBaseUrl);
             if (!result.Success)
             {
+                ModelState.AddValidationErrors(result.Errors);
                 ModelState.AddModelError(string.Empty, result.Message);
                 return View(dto);
             }

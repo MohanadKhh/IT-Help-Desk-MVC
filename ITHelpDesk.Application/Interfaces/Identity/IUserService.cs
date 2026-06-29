@@ -8,5 +8,6 @@ namespace ITHelpDesk.Application.Interfaces.Identity
         Task<List<UserSelectItemDto>> GetAllUsersDropdownAsync();
         Task<string?> GetUserNameByIdAsync(int userId);
         Task<string?> GetEmailByUserIdAsync(int userId);
+        Task<List<string>> GetAdminEmailsAsync();
     }
 }

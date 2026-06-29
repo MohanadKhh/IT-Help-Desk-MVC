@@ -1,4 +1,4 @@
-﻿@model TicketDto
+@model TicketDto
 
 @{
     ViewData["Title"] = Model.Title;
@@ -7,10 +7,25 @@
 <div class="row">
     <div class="col-md-8">
         <div class="card border-0 shadow-sm mb-3">
-            <div class="card-header bg-white d-flex justify-content-between">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">@Model.Title</h5>
-                <a asp-controller="Tickets" asp-action="Edit" asp-route-id="@Model.TicketId"
-                   class="btn btn-sm btn-outline-primary">Edit</a>
+                <div class="d-flex gap-2">
+                    @if (User.IsInRole("Admin") || User.FindFirst(ClaimTypes.NameIdentifier)?.Value == Model.CreatedById.ToString())
+                    {
+                        <a asp-controller="Tickets" asp-action="Edit" asp-route-id="@Model.TicketId"
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-pencil me-1"></i>Edit
+                        </a>
+
+                        <form asp-controller="Tickets" asp-action="Delete" asp-route-id="@Model.TicketId" method="post"
+                              class="d-inline" onsubmit="return confirm('Are you sure you want to delete this ticket?')">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash me-1"></i>Delete
+                            </button>
+                        </form>
+                    }
+                </div>
             </div>
             <div class="card-body">
                 <p class="text-muted">@Model.Description</p>
@@ -42,17 +57,34 @@
                     </div>
                     <div class="col-6">
                         <small class="text-muted d-block">Created</small>
-                        <strong>@Model.CreatedAt.ToString("dd MMM yyyy HH:mm")</strong>
+                        <strong>@DateHelper.FormatCairoDate(Model.CreatedAt)</strong>
+                    </div>
+
+                    <div class="col-6">
+                        <small class="text-muted d-block">Due Date</small>
+                        @{
+                            bool isBreached = Model.DueDate < DateTime.UtcNow
+                                              && Model.Status != TicketStatus.Resolved
+                                              && Model.Status != TicketStatus.Closed;
+
+                            <strong class="@(isBreached ? "text-danger" : "")">
+                                @DateHelper.FormatCairoDate(Model.DueDate)
+                                @if (isBreached)
+                                {
+                                    <span class="badge bg-danger ms-1">SLA Breached</span>
+                                }
+                            </strong>
+                        }
                     </div>
 
                     <div class="col-6">
                         <small class="text-muted d-block">Updated</small>
-                        <strong>@(Model.UpdatedAt.ToString("dd MMM yyyy HH:mm") ?? "Not updated")</strong>
+                        <strong>@(Model.UpdatedAt.HasValue ? DateHelper.FormatCairoDate(Model.UpdatedAt.Value) : "Not updated")</strong>
                     </div>
 
                     <div class="col-6">
                         <small class="text-muted d-block">Resolved</small>
-                        <strong>@(Model.ResolvedAt?.ToString("dd MMM yyyy HH:mm") ?? "Not resolved")</strong>
+                        <strong>@(Model.ResolvedAt.HasValue ? DateHelper.FormatCairoDate(Model.ResolvedAt.Value) : "Not resolved")</strong>
                     </div>
                 </div>
             </div>
@@ -63,58 +95,12 @@
         }
         @await Html.PartialAsync("_CommentsPartial", Model.Comments)
 
-        @*       <!-- Comments -->
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white">
-                <h6 class="mb-0">Comments</h6>
-            </div>
-            <div class="card-body">
-                @if (Model.Comments.Any())
-                {
-                    @foreach (var c in Model.Comments)
-                    {
-                        <div class="border-bottom pb-3 mb-3">
-                            <div class="d-flex justify-content-between">
-                                <strong class="small">@c.CreatedByName</strong>
-                                <span class="text-muted small">
-                                    @c.CreatedAt.ToString("dd MMM yyyy")
-                                </span>
-                            </div>
-                            <p class="mb-0 mt-1">@c.Content</p>
-                        </div>
-                    }
-                }
-                else
-                {
-                    <p class="text-muted small mb-0">No comments yet.</p>
-                }
-            </div>
-        </div>
-    </div> *@
-
-        @* <!-- Sidebar: History -->
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white">
-                <h6 class="mb-0">History</h6>
-            </div>
-            <ul class="list-group list-group-flush">
-                @foreach (var h in Model.History)
-                {
-                    <li class="list-group-item small">
-                        <span class="text-muted">@h.ChangedAt.ToString("dd MMM")</span>
-                        <span class="ms-2">
-                            <strong>@h.FieldChanged</strong>
-                            changed from
-                            <em>@h.OldValue</em> →
-                            <strong>@h.NewValue</strong>
-                        </span>
-                    </li>
-                }
-            </ul>
-        </div>
-    </div> *@
     </div>
+
+    <div class="col-md-4">
+        @await Html.PartialAsync("_HistoryPartial", Model.Histories)
+    </div>
+</div>
 
 
 @functions {

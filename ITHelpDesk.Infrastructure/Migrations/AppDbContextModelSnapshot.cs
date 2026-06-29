@@ -58,6 +58,9 @@ namespace ITHelpDesk.Infrastructure.Migrations
                     b.Property<int?>("AssignedToId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("BreachEmailSent")
+                        .HasColumnType("bit");
+
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
@@ -72,6 +75,9 @@ namespace ITHelpDesk.Infrastructure.Migrations
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Priority")
                         .IsRequired()
@@ -95,10 +101,14 @@ namespace ITHelpDesk.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
+                    b.Property<bool>("UnassignedReminderSent")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("WarningEmailSent")
+                        .HasColumnType("bit");
 
                     b.HasKey("TicketId");
 
@@ -134,10 +144,8 @@ namespace ITHelpDesk.Infrastructure.Migrations
                     b.Property<int>("TicketId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("CommentId");
 
@@ -164,10 +172,9 @@ namespace ITHelpDesk.Infrastructure.Migrations
                     b.Property<int>("ChangedById")
                         .HasColumnType("int");
 
-                    b.Property<string>("FieldChanged")
-                        .IsRequired()
+                    b.Property<int>("FieldChanged")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("int");
 
                     b.Property<string>("NewValue")
                         .HasMaxLength(200)

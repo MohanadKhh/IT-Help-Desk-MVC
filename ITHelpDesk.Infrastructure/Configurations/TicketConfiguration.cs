@@ -34,8 +34,8 @@ public class TicketConfiguration : IEntityTypeConfiguration<Ticket>
         builder.Property(ticket => ticket.CreatedAt)
             .HasDefaultValueSql("GETDATE()");
 
-        builder.Property(ticket => ticket.UpdatedAt)
-            .HasDefaultValueSql("GETDATE()");
+        //builder.Property(ticket => ticket.UpdatedAt)
+        //    .HasDefaultValueSql("GETDATE()");
 
         builder.HasOne(ticket => ticket.Category)
             .WithMany(category => category.Tickets)

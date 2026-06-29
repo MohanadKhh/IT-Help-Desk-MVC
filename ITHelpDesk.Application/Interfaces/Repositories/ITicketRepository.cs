@@ -6,4 +6,5 @@ public interface ITicketRepository : IRepository<Ticket, int>
 {
     Task<IEnumerable<Ticket>> GetTicketsWithCategoryAsync();
     Task<Ticket?> GetTicketByIdWithIncludesAsync(int id);
+    Task<List<Ticket>> GetTicketsNeedingSlaCheckAsync();
 }

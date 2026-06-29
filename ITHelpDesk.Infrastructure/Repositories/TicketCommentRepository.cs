@@ -11,6 +11,13 @@ public class TicketCommentRepository : Repository<TicketComment, int>, ITicketCo
     {
     }
 
+    public async Task<TicketComment?> GetCommentWithTicketByIdAsync(int commentId)
+    {
+        return await _context.TicketComments
+            .Include(c => c.Ticket)
+            .FirstOrDefaultAsync(c => c.CommentId == commentId);
+    }
+
     public async Task<List<TicketComment>> GetCommentsForTicketAsync(int ticketId)
     {
         return await _context.TicketComments

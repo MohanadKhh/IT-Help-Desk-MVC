@@ -12,10 +12,13 @@ public class Ticket
     public int CategoryId { get; set; }
     public int CreatedById { get; set; }
     public int? AssignedToId { get; set; }
+    public DateTime DueDate { get; set; }
     public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
     public DateTime? ResolvedAt { get; set; }
-
+    public bool WarningEmailSent { get; set; } = false;
+    public bool BreachEmailSent { get; set; } = false;
+    public bool UnassignedReminderSent { get; set; } = false;
     public virtual Category? Category { get; set; }
     public virtual ICollection<TicketComment>? TicketComments { get; set; } = new HashSet<TicketComment>();
     public virtual ICollection<TicketHistory>? TicketHistories { get; set; } = new HashSet<TicketHistory>();

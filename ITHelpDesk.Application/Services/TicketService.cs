@@ -1,9 +1,13 @@
+using FluentValidation;
 using ITHelpDesk.Application.DTOs.TicketComments;
+using ITHelpDesk.Application.DTOs.TicketHistories;
 using ITHelpDesk.Application.DTOs.Tickets;
 using ITHelpDesk.Application.Interfaces.Identity;
 using ITHelpDesk.Application.Interfaces.Services;
 using ITHelpDesk.Application.Interfaces.UnitOfWork;
 using ITHelpDesk.Domain.Entities;
+using ITHelpDesk.Domain.Enums;
+using ITHelpDesk.Application.Common.Helpers;
 
 namespace ITHelpDesk.Application.Services;
 
@@ -12,22 +16,52 @@ public class TicketService : ITicketService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserService _userService;
     private readonly IEmailService _emailService;
+    private readonly ICommentService _commentService;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IHistoryService _historyService;
+    private readonly IValidator<CreateTicketDto> _createValidator;
+    private readonly IValidator<EditTicketDto> _editValidator;
 
     public TicketService(IUnitOfWork unitOfWork, IUserService userService,
                         IEmailService emailService,
-                        ICurrentUserService currentUserService)
+                        ICommentService commentService,
+                        ICurrentUserService currentUserService,
+                        IHistoryService historyService,
+                        IValidator<CreateTicketDto> createValidator,
+                        IValidator<EditTicketDto> editValidator)
     {
         _unitOfWork = unitOfWork;
         _userService = userService;
         _emailService = emailService;
+        _commentService = commentService;
+        _historyService = historyService;
         _currentUserService = currentUserService;
+        _createValidator = createValidator;
+        _editValidator = editValidator;
     }
 
     public async Task<GeneralResult> CreateTicketAsync(CreateTicketDto createTicketDto)
     {
+        var validationResult = await _createValidator.ValidateAsync(createTicketDto);
+        if (!validationResult.IsValid)
+        {
+            Dictionary<string, List<Error>> errors = validationResult.ToError();
+            return GeneralResult.FailedResult(errors);
+        }
+
         if (!_currentUserService.IsAuthenticated || _currentUserService.UserId is null)
             return GeneralResult.FailedResult("User is not authenticated.");
+
+        var dueDate = createTicketDto.DueDate.HasValue
+                        ? DateHelper.ToUtcDate(createTicketDto.DueDate.Value)
+                        : createTicketDto.Priority switch
+                        {
+                            "Critical" => DateTime.UtcNow.AddHours(4),
+                            "High" => DateTime.UtcNow.AddHours(24),
+                            "Medium" => DateTime.UtcNow.AddDays(3),
+                            "Low" => DateTime.UtcNow.AddDays(7),
+                            _ => DateTime.UtcNow.AddDays(3)
+                        };
 
         var ticket = new Ticket
         {
@@ -36,18 +70,28 @@ public class TicketService : ITicketService
             Priority = createTicketDto.Priority,
             CategoryId = createTicketDto.CategoryId,
             CreatedById = _currentUserService.UserId.Value,
+            AssignedToId = createTicketDto.AssignedToId,
             CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            DueDate = dueDate,
         };
 
-        await _unitOfWork.TicketRepository.AddAsync(ticket);
-        await _unitOfWork.SaveChangesAsync();
+    await _unitOfWork.TicketRepository.AddAsync(ticket);
+    await _historyService.LogHistoryAsync(ticket, TicketHistoryField.TicketCreated);
+
+    await _unitOfWork.SaveChangesAsync();
 
         return GeneralResult<TicketDto>.SuccessedResult(ticket.MapToDto(), "Ticket created successfully.");
     }
 
     public async Task<GeneralResult> UpdateTicketAsync(EditTicketDto editTicketDto)
     {
+        var validationResult = await _editValidator.ValidateAsync(editTicketDto);
+        if (!validationResult.IsValid)
+        {
+            Dictionary<string, List<Error>> errors = validationResult.ToError();
+            return GeneralResult.FailedResult(errors);
+        }
+
         var ticket = await _unitOfWork.TicketRepository.GetByIdAsync(editTicketDto.TicketId);
 
         if (ticket == null)
@@ -55,9 +99,14 @@ public class TicketService : ITicketService
             return GeneralResult.NotFound($"Ticket {editTicketDto.TicketId} not found.");
         }
 
+        if (!_currentUserService.IsAdmin && ticket.CreatedById != _currentUserService.UserId)
+        {
+            return GeneralResult.FailedResult("You do not have permission to edit this ticket.");
+        }
+
         var userEmail = await _userService.GetEmailByUserIdAsync(ticket.CreatedById);
-        if (editTicketDto.Status == Domain.Enums.TicketStatus.Resolved
-            && ticket.Status != Domain.Enums.TicketStatus.Resolved
+        if (editTicketDto.Status == TicketStatus.Resolved
+            && ticket.Status != TicketStatus.Resolved
             && !string.IsNullOrEmpty(userEmail))
         {
             var body = $@"
@@ -91,14 +140,43 @@ public class TicketService : ITicketService
             await _emailService.SendEmailAsync(userEmail, $"Ticket {ticket.TicketId} is Resolved", body);
         }
 
-        if (HasChanges(ticket, editTicketDto))
+        var changes = GetChanges(ticket, editTicketDto);
+        if (changes.Count > 0)
         {
+            foreach (var change in changes)
+            {
+                string? oldValue = change switch
+                {
+                    "Title" => ticket.Title,
+                    "Description" => ticket.Description,
+                    "Status" => ticket.Status.ToString(),
+                    "Priority" => ticket.Priority.ToString(),
+                    "Category" => ticket.CategoryId.ToString(),
+                    "AssignedTo" => ticket.AssignedToId.HasValue ? _userService.GetUserNameByIdAsync(ticket.AssignedToId.Value).Result : null,
+                    "DueDate" => ticket.DueDate.ToString(),
+                    _ => null
+                };
+                string? newValue = change switch
+                {
+                    "Title" => editTicketDto.Title,
+                    "Description" => editTicketDto.Description,
+                    "Status" => editTicketDto.Status.ToString(),
+                    "Priority" => editTicketDto.Priority.ToString(),
+                    "Category" => editTicketDto.CategoryId.ToString(),
+                    "AssignedTo" => editTicketDto.AssignedToId.HasValue ? _userService.GetUserNameByIdAsync(editTicketDto.AssignedToId.Value).Result : null,
+                    "DueDate" => DateHelper.ToUtcDate(editTicketDto.DueDate).ToString(),
+                    _ => null
+                };
+                await _historyService.LogHistoryAsync(ticket, Enum.Parse<TicketHistoryField>(change), oldValue, newValue);
+            }
+
             ticket.Title = editTicketDto.Title;
             ticket.Description = editTicketDto.Description;
             ticket.Status = editTicketDto.Status;
             ticket.Priority = editTicketDto.Priority;
             ticket.CategoryId = editTicketDto.CategoryId;
             ticket.AssignedToId = editTicketDto.AssignedToId;
+            ticket.DueDate = DateHelper.ToUtcDate(editTicketDto.DueDate);
             ticket.UpdatedAt = DateTime.UtcNow;
         }
         else
@@ -121,7 +199,14 @@ public class TicketService : ITicketService
             return GeneralResult.NotFound($"Ticket {ticketId} not found.");
         }
 
+        if (!_currentUserService.IsAdmin && ticket.CreatedById != _currentUserService.UserId)
+        {
+            return GeneralResult.FailedResult("You do not have permission to delete this ticket.");
+        }
+
         _unitOfWork.TicketRepository.Remove(ticket);
+        await _historyService.LogHistoryAsync(ticket, TicketHistoryField.TicketDeleted);
+
         await _unitOfWork.SaveChangesAsync();
 
         return GeneralResult.SuccessedResult("Ticket deleted successfully.");
@@ -140,24 +225,14 @@ public class TicketService : ITicketService
                             ? await _userService.GetUserNameByIdAsync(ticket.AssignedToId.Value)
                             : null;
 
-        IEnumerable<TicketCommentDto> commentsDtos = Enumerable.Empty<TicketCommentDto>(); ;
-        if (ticket.TicketComments?.Any() == true)
-        {
-            commentsDtos = (await Task.WhenAll(
-                ticket.TicketComments.Select(async c => new TicketCommentDto(
-                    c.CommentId,
-                    await _userService.GetUserNameByIdAsync(c.CreatedById) ?? "Unknown",
-                    c.Content,
-                    c.CreatedAt,
-                    c.UpdatedAt
-                ))
-            )).ToList();
-        }
+        List<TicketCommentDto> commentsDtos = await _commentService.GetTicketCommentsAsync(ticketId);
+        List<TicketHistoryDto> historiesDtos = await _historyService.GetTicketHistoriesAsync(ticketId);
 
         var ticketDto = ticket.MapToDto(
                     createdByName: createdByName ?? "Unknown",
                     assignedToName: assignedToName ?? null,
-                    ticketComments: commentsDtos
+                    ticketComments: commentsDtos,
+                    ticketHistories: historiesDtos
                 );
 
         return GeneralResult<TicketDto>.SuccessedResult(ticketDto, $"Ticket {ticketId} retrieved successfully.");
@@ -169,6 +244,11 @@ public class TicketService : ITicketService
         if (ticket == null)
         {
             return GeneralResult<EditTicketDto>.NotFound($"Ticket {ticketId} not found.");
+        }
+
+        if (!_currentUserService.IsAdmin && ticket.CreatedById != _currentUserService.UserId)
+        {
+            return GeneralResult<EditTicketDto>.FailedResult("You do not have permission to edit this ticket.");
         }
 
         var editTicketDto = ticket.MapToEditDto();
@@ -200,13 +280,33 @@ public class TicketService : ITicketService
         return GeneralResult<IEnumerable<TicketDto>>.SuccessedResult(ticketDtos, "All tickets retrieved successfully.");
     }
 
-    private static bool HasChanges(Ticket ticket, EditTicketDto dto)
+
+    // Private helper
+    private static List<string> GetChanges(Ticket ticket, EditTicketDto dto)
     {
-        return ticket.Title != dto.Title ||
-               ticket.Description != dto.Description ||
-               ticket.Status != dto.Status ||
-               ticket.Priority != dto.Priority ||
-               ticket.CategoryId != dto.CategoryId ||
-               ticket.AssignedToId != dto.AssignedToId;
+        var changes = new List<string>();
+
+        if (ticket.Title != dto.Title)
+            changes.Add("Title");
+
+        if (ticket.Description != dto.Description)
+            changes.Add("Description");
+
+        if (ticket.Status != dto.Status)
+            changes.Add("Status");
+
+        if (ticket.Priority != dto.Priority)
+            changes.Add("Priority");
+
+        if (ticket.CategoryId != dto.CategoryId)
+            changes.Add("Category");
+
+        if (ticket.AssignedToId != dto.AssignedToId)
+            changes.Add("AssignedTo");
+
+        if (ticket.DueDate != DateHelper.ToUtcDate(dto.DueDate))
+            changes.Add("DueDate");
+
+        return changes;
     }
 }

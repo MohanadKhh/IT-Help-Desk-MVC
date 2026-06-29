@@ -23,7 +23,8 @@
                     <th>Status</th>
                     <th>Created By</th>
                     <th>Assigned To</th>
-                    <th>Created</th>
+                    <th>Created At</th>
+                    <th>Due Date</th>
                     <th></th>
                 </tr>
             </thead>
@@ -47,7 +48,18 @@
                         <td>@ticket.CreatedByName</td>
                         <td>@(ticket.AssignedToName ?? "Unassigned")</td>
                         <td class="text-muted small">
-                            @ticket.CreatedAt.ToString("dd MMM yyyy")
+                            @DateHelper.FormatCairoDate(ticket.CreatedAt)
+                        </td>
+                        <td>
+                            @{
+                                var overdue = ticket.DueDate < DateTime.UtcNow &&
+                                              ticket.Status != TicketStatus.Resolved &&
+                                              ticket.Status != TicketStatus.Closed;
+                            }
+
+                            <span class="badge @(overdue ? "bg-danger" : "bg-light text-dark")">
+                                @DateHelper.FormatCairoDate(ticket.DueDate)
+                            </span>
                         </td>
                         <td>
                             <a asp-controller="Tickets" asp-action="Details" asp-route-id="@ticket.TicketId"

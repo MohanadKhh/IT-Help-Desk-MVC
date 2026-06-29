@@ -11,6 +11,8 @@ namespace ITHelpDesk.Application
             services.AddScoped<ITicketService, TicketService>();
             services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IHistoryService, HistoryService>();
+            services.AddScoped<ISlaCheckService, SlaCheckService>();
             return services;
         }
     }

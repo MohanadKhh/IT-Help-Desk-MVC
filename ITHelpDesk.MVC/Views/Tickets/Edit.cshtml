@@ -1,5 +1,4 @@
-﻿<!-- Views/Tickets/Edit.cshtml -->
-@model TicketEditViewModel
+﻿@model TicketEditViewModel
 
 @{
     ViewData["Title"] = "Edit Ticket";
@@ -87,7 +86,7 @@
                     </div>
 
                     <!-- Status + Assign To -->
-                    <div class="row g-3 mb-4">
+                    <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label asp-for="Input.Status"
                                    class="form-label small fw-medium">
@@ -115,6 +114,23 @@
                                 <option value="">-- Leave Unassigned --</option>
                             </select>
                         </div>
+                    </div>
+
+                    <!-- Due Date -->
+                    <div class="mb-4">
+                        <label asp-for="Input.DueDate" class="form-label small fw-medium">
+                            Due Date
+                            <span class="text-muted fw-normal">(SLA deadline)</span>
+                        </label>
+                        <input asp-for="Input.DueDate" type="datetime-local" step="60" class="form-control" />
+                        <span asp-validation-for="Input.DueDate"
+                              class="text-danger small"></span>
+                        @if (Model.Input.DueDate < DateTime.UtcNow && Model.Input.Status != TicketStatus.Resolved && Model.Input.Status != TicketStatus.Closed)
+                        {
+                            <small class="text-danger d-block mt-1">
+                                <i class="bi bi-exclamation-triangle"></i> This ticket has breached its SLA deadline.
+                            </small>
+                        }
                     </div>
 
                     <!-- Actions -->

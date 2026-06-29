@@ -1,4 +1,5 @@
-﻿using ITHelpDesk.Application;
+using FluentValidation;
+using ITHelpDesk.Application;
 using ITHelpDesk.Application.DTOs.Authentications;
 using ITHelpDesk.Application.Interfaces.Identity;
 using ITHelpDesk.Infrastructure.Identity;
@@ -13,21 +14,34 @@ namespace ITHelpDesk.Infrastructure.Services.Identity
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailService _emailService;
         private readonly IConfiguration _configuration;
+        private readonly IValidator<LoginDto> _loginValidator;
+        private readonly IValidator<RegisterDto> _registerValidator;
 
         public AuthService(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IEmailService emailService,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IValidator<LoginDto> loginValidator,
+            IValidator<RegisterDto> registerValidator)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailService = emailService;
             _configuration = configuration;
+            _loginValidator = loginValidator;
+            _registerValidator = registerValidator;
         }
 
         public async Task<GeneralResult> LoginAsync(LoginDto dto)
         {
+            var validationResult = await _loginValidator.ValidateAsync(dto);
+            if (!validationResult.IsValid)
+            {
+                Dictionary<string, List<Error>> errors = validationResult.ToError();
+                return GeneralResult.FailedResult(errors);
+            }
+
             var user = await _userManager.FindByEmailAsync(dto.Email);
             if (user == null)
                 return GeneralResult.FailedResult("Invalid email or password.");
@@ -62,6 +76,13 @@ namespace ITHelpDesk.Infrastructure.Services.Identity
 
         public async Task<GeneralResult> RegisterAsync(RegisterDto dto, string confirmationBaseUrl)
         {
+            var validationResult = await _registerValidator.ValidateAsync(dto);
+            if (!validationResult.IsValid)
+            {
+                Dictionary<string, List<Error>> errors = validationResult.ToError();
+                return GeneralResult.FailedResult(errors);
+            }
+
             var existingUser = await _userManager.FindByEmailAsync(dto.Email);
             if (existingUser != null)
                 return GeneralResult.FailedResult("Email is already registered.");

@@ -2,10 +2,11 @@ namespace ITHelpDesk.Application.DTOs.TicketComments;
 
 public record TicketCommentDto(
     int CommentId,
+    int CreatedById,
     string CreatedByName,
     string Content,
     DateTime CreatedAt,
-    DateTime UpdatedAt
+    DateTime? UpdatedAt
 );
 
 public record CreateTicketCommentDto(

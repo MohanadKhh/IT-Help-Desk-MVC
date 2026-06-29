@@ -35,7 +35,7 @@ public class GeneralResult : IGeneralResult
 }
 public class GeneralResult<T> : GeneralResult
 {
-    public T? Data { get; set; }
+    public T Data { get; set; } = default!;
 
     public static GeneralResult<T> SuccessedResult(T data, string message = "Success") => new()
     {

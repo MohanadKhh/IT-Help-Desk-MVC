@@ -1,0 +1,112 @@
+﻿@model List<TicketHistoryDto>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white">
+        <h6 class="mb-0">
+            <i class="bi bi-clock-history me-1"></i> Activity History
+        </h6>
+    </div>
+
+    @if (Model.Any())
+    {
+        <ul class="list-group list-group-flush" style="max-height: 400px; overflow-y: auto;">
+            @foreach (var h in Model)
+            {
+                <li class="list-group-item small">
+                    <div class="text-muted" style="font-size: 0.75rem;">
+                        @DateHelper.FormatCairoDate(h.ChangedAt)
+                    </div>
+
+                    @switch (h.FieldChanged)
+                    {
+                        case TicketHistoryField.TicketCreated:
+                            <span><i class="bi bi-plus-circle text-success"></i> <strong>@h.ChangedByName</strong> created this ticket</span>
+                            break;
+
+                        case TicketHistoryField.TicketDeleted:
+                            <span><i class="bi bi-trash text-danger"></i> <strong>@h.ChangedByName</strong> deleted this ticket</span>
+                            break;
+
+                        case TicketHistoryField.CommentAdded:
+                            <span><i class="bi bi-chat-left-text text-primary"></i> <strong>@h.ChangedByName</strong> added a comment</span>
+                            break;
+
+                        case TicketHistoryField.CommentEdited:
+                            <span>
+                                <i class="bi bi-pencil text-warning"></i> <strong>@h.ChangedByName</strong> edited a comment from
+                                <em>@h.OldValue</em> to <strong>@h.NewValue</strong>
+                            </span>
+                            break;
+
+                        case TicketHistoryField.CommentDeleted:
+                            <span><i class="bi bi-trash text-danger"></i> <strong>@h.ChangedByName</strong> deleted a comment</span>
+                            break;
+
+                        case TicketHistoryField.Status:
+                            <span>
+                                <i class="bi bi-pencil text-warning"></i>
+                                <strong>@h.ChangedByName</strong> changed status from
+                                <span class="badge bg-secondary">@h.OldValue</span> to
+                                <span class="badge bg-primary">@h.NewValue</span>
+                            </span>
+                            break;
+
+                        case TicketHistoryField.Priority:
+                            <span>
+                                <i class="bi bi-pencil text-warning"></i>
+                                <strong>@h.ChangedByName</strong> changed priority from
+                                <span class="badge bg-secondary">@h.OldValue</span> to
+                                <span class="badge bg-primary">@h.NewValue</span>
+                            </span>
+                            break;
+
+                        case TicketHistoryField.AssignedTo:
+                            <span>
+                                <i class="bi bi-pencil text-warning"></i>
+                                <strong>@h.ChangedByName</strong> reassigned ticket
+                                @if (string.IsNullOrEmpty(h.OldValue))
+                                {
+                                    <span>
+                                        from
+                                        <strong>Unassigned</strong> to
+                                        <span class="badge bg-primary">@h.NewValue</span>
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>
+                                        from
+                                        <span class="badge bg-secondary">@h.OldValue</span> to
+                                        <span class="badge bg-primary">@h.NewValue</span>
+                                    </span>
+                                }
+                            </span>
+                            break;
+
+                        case TicketHistoryField.Title:
+                            <span>
+                                <i class="bi bi-pencil text-warning"></i>
+                                <strong>@h.ChangedByName</strong> changed title from
+                                <span class="badge bg-secondary">@h.OldValue</span> to
+                                <span class="badge bg-primary">@h.NewValue</span>
+                            </span>
+                            break;
+
+                        default:
+                            <span>
+                                <i class="bi bi-pencil text-warning"></i>
+                                <strong>@h.ChangedByName</strong> updated @h.FieldChanged
+                            </span>
+                            break;
+                    }
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <div class="card-body">
+            <p class="text-muted small mb-0">No activity yet.</p>
+        </div>
+    }
+</div>

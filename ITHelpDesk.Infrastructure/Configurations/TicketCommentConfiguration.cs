@@ -18,8 +18,8 @@ public class TicketCommentConfiguration : IEntityTypeConfiguration<TicketComment
         builder.Property(comment => comment.CreatedAt)
             .HasDefaultValueSql("GETDATE()");
         
-        builder.Property(comment => comment.UpdatedAt)
-            .HasDefaultValueSql("GETDATE()");
+        //builder.Property(comment => comment.UpdatedAt)
+        //    .HasDefaultValueSql("GETDATE()");
 
         builder.HasOne(comment => comment.Ticket)
             .WithMany(ticket => ticket.TicketComments)
