@@ -109,7 +109,13 @@ namespace ITHelpDesk.Infrastructure.Services.Identity
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var confirmationLink = $"{confirmationBaseUrl}?userId={user.Id}&token={Uri.EscapeDataString(token)}";
-            await _emailService.SendEmailAsync(user.Email!, "Confirm Your Email", $"<a href='{confirmationLink}'>Confirm Email</a>");
+            var emailSent = await _emailService.SendEmailAsync(user.Email!, "Confirm Your Email", $"<a href='{confirmationLink}'>Confirm Email</a>");
+
+            if (!emailSent)
+            {
+                await _userManager.DeleteAsync(user);
+                return GeneralResult.FailedResult("Failed to send confirmation email. Registration aborted.");
+            }
 
             return GeneralResult.SuccessedResult("Registered successfully.");
         }

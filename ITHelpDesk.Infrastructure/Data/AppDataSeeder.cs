@@ -60,6 +60,7 @@ public static class AppDataSeeder
         //DateTime values for seeding
         var createdAt = new DateTime(2026, 6, 6);
         var updatedAt = new DateTime(2026, 6, 7);
+        var dueDate = new DateTime(2026, 7, 1, 12, 0, 0);
 
         // 3. Seed Categories
         if (!await context.Categories.AnyAsync())
@@ -95,7 +96,8 @@ public static class AppDataSeeder
                     CategoryId   = softwareCategory.CategoryId,
                     CreatedById  = normalUser.Id,
                     CreatedAt    = createdAt,
-                    UpdatedAt    = updatedAt
+                    UpdatedAt    = updatedAt,
+                    DueDate      = dueDate
                 },
                 // Ticket 2
                 new Ticket
@@ -108,7 +110,8 @@ public static class AppDataSeeder
                     CreatedById  = normalUser.Id,
                     AssignedToId = adminUser.Id,
                     CreatedAt    = createdAt,
-                    UpdatedAt    = updatedAt
+                    UpdatedAt    = updatedAt,
+                    DueDate      = dueDate.AddHours(2)
                 },
                 // Ticket 3
                 new Ticket
@@ -120,7 +123,8 @@ public static class AppDataSeeder
                     CategoryId   = networkCategory.CategoryId,
                     CreatedById  = normalUser.Id,
                     CreatedAt    = createdAt,
-                    UpdatedAt    = updatedAt
+                    UpdatedAt    = updatedAt,
+                    DueDate      = dueDate.AddDays(1)
                 },
                 // Ticket 4
                 new Ticket
@@ -133,7 +137,8 @@ public static class AppDataSeeder
                     CreatedById  = normalUser.Id,
                     AssignedToId = adminUser.Id,
                     CreatedAt    = createdAt,
-                    UpdatedAt    = updatedAt
+                    UpdatedAt    = updatedAt,
+                    DueDate      = dueDate.AddDays(-1)
                 },
                 // Ticket 5
                 new Ticket
@@ -146,7 +151,8 @@ public static class AppDataSeeder
                     CreatedById  = normalUser.Id,
                     AssignedToId = adminUser.Id,
                     CreatedAt    = createdAt,
-                    UpdatedAt    = updatedAt
+                    UpdatedAt    = updatedAt,
+                    DueDate      = dueDate.AddDays(7)
                 }
             };
 

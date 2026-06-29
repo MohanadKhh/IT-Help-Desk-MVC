@@ -1,4 +1,4 @@
-﻿using ITHelpDesk.Application.Interfaces.Identity;
+using ITHelpDesk.Application.Interfaces.Identity;
 using ITHelpDesk.Application.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -18,7 +18,7 @@ public sealed class EmailService : IEmailService
         _logger = logger;
     }
 
-    public async Task SendEmailAsync(string toEmail, string subject, string htmlBody, List<string>? ccEmails = null)
+    public async Task<bool> SendEmailAsync(string toEmail, string subject, string htmlBody, List<string>? ccEmails = null)
     {
         try
         {
@@ -45,12 +45,15 @@ public sealed class EmailService : IEmailService
             {
                 var body = await response.Body.ReadAsStringAsync();
                 _logger.LogError("SendGrid failed: {Status} - {Content}", response.StatusCode, body);
+                return false;
             }
+
+            return true;
         }
         catch (Exception ex)
         {
-            // Never let email failure break ticket creation/registration
             _logger.LogError(ex, "Failed to send email to {Email}", toEmail);
+            return false;
         }
     }
 }
