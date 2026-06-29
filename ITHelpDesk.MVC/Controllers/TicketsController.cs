@@ -127,7 +127,7 @@ namespace ITHelpDesk.MVC.Controllers
             {
                 Input = result.Data with
                 {
-                    DueDate = DateHelper.ToCairoDate(result.Data.DueDate)
+                    DueDate = DateHelper.ToCairoTime(result.Data.DueDate)
                 },
                 Categories = categories.Select(u => new SelectListItem
                 {

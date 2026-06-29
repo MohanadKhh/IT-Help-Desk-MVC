@@ -21,12 +21,12 @@
                         <div>
                             <strong class="small">@comment.CreatedByName</strong>
                             <span class="text-muted small ms-2">
-                                @DateHelper.FormatCairoDate(comment.CreatedAt)
+                                @DateHelper.FormatCairoTime(comment.CreatedAt)
                             </span>
                             @if (comment.UpdatedAt is DateTime updatedAt)
                             {
                                 <span class="text-muted small ms-2">
-                                    edited at @DateHelper.FormatCairoDate(updatedAt)
+                                    edited at @DateHelper.FormatCairoTime(updatedAt)
                                 </span>
                             }
                         </div>

@@ -48,7 +48,7 @@
                         <td>@ticket.CreatedByName</td>
                         <td>@(ticket.AssignedToName ?? "Unassigned")</td>
                         <td class="text-muted small">
-                            @DateHelper.FormatCairoDate(ticket.CreatedAt)
+                            @DateHelper.FormatCairoTime(ticket.CreatedAt)
                         </td>
                         <td>
                             @{
@@ -58,7 +58,7 @@
                             }
 
                             <span class="badge @(overdue ? "bg-danger" : "bg-light text-dark")">
-                                @DateHelper.FormatCairoDate(ticket.DueDate)
+                                @DateHelper.FormatCairoTime(ticket.DueDate)
                             </span>
                         </td>
                         <td>

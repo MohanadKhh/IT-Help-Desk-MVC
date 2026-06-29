@@ -57,7 +57,7 @@
                     </div>
                     <div class="col-6">
                         <small class="text-muted d-block">Created</small>
-                        <strong>@DateHelper.FormatCairoDate(Model.CreatedAt)</strong>
+                        <strong>@DateHelper.FormatCairoTime(Model.CreatedAt)</strong>
                     </div>
 
                     <div class="col-6">
@@ -68,7 +68,7 @@
                                               && Model.Status != TicketStatus.Closed;
 
                             <strong class="@(isBreached ? "text-danger" : "")">
-                                @DateHelper.FormatCairoDate(Model.DueDate)
+                                @DateHelper.FormatCairoTime(Model.DueDate)
                                 @if (isBreached)
                                 {
                                     <span class="badge bg-danger ms-1">SLA Breached</span>
@@ -79,12 +79,12 @@
 
                     <div class="col-6">
                         <small class="text-muted d-block">Updated</small>
-                        <strong>@(Model.UpdatedAt.HasValue ? DateHelper.FormatCairoDate(Model.UpdatedAt.Value) : "Not updated")</strong>
+                        <strong>@(Model.UpdatedAt.HasValue ? DateHelper.FormatCairoTime(Model.UpdatedAt.Value) : "Not updated")</strong>
                     </div>
 
                     <div class="col-6">
                         <small class="text-muted d-block">Resolved</small>
-                        <strong>@(Model.ResolvedAt.HasValue ? DateHelper.FormatCairoDate(Model.ResolvedAt.Value) : "Not resolved")</strong>
+                        <strong>@(Model.ResolvedAt.HasValue ? DateHelper.FormatCairoTime(Model.ResolvedAt.Value) : "Not resolved")</strong>
                     </div>
                 </div>
             </div>

@@ -53,7 +53,7 @@ public class TicketService : ITicketService
             return GeneralResult.FailedResult("User is not authenticated.");
 
         var dueDate = createTicketDto.DueDate.HasValue
-                        ? DateHelper.ToUtcDate(createTicketDto.DueDate.Value)
+                        ? DateHelper.ToUtcTime(createTicketDto.DueDate.Value)
                         : createTicketDto.Priority switch
                         {
                             "Critical" => DateTime.UtcNow.AddHours(4),
@@ -164,7 +164,7 @@ public class TicketService : ITicketService
                     "Priority" => editTicketDto.Priority.ToString(),
                     "Category" => editTicketDto.CategoryId.ToString(),
                     "AssignedTo" => editTicketDto.AssignedToId.HasValue ? _userService.GetUserNameByIdAsync(editTicketDto.AssignedToId.Value).Result : null,
-                    "DueDate" => DateHelper.ToUtcDate(editTicketDto.DueDate).ToString(),
+                    "DueDate" => DateHelper.ToUtcTime(editTicketDto.DueDate).ToString(),
                     _ => null
                 };
                 await _historyService.LogHistoryAsync(ticket, Enum.Parse<TicketHistoryField>(change), oldValue, newValue);
@@ -176,7 +176,7 @@ public class TicketService : ITicketService
             ticket.Priority = editTicketDto.Priority;
             ticket.CategoryId = editTicketDto.CategoryId;
             ticket.AssignedToId = editTicketDto.AssignedToId;
-            ticket.DueDate = DateHelper.ToUtcDate(editTicketDto.DueDate);
+            ticket.DueDate = DateHelper.ToUtcTime(editTicketDto.DueDate);
             ticket.UpdatedAt = DateTime.UtcNow;
         }
         else
@@ -304,7 +304,7 @@ public class TicketService : ITicketService
         if (ticket.AssignedToId != dto.AssignedToId)
             changes.Add("AssignedTo");
 
-        if (ticket.DueDate != DateHelper.ToUtcDate(dto.DueDate))
+        if (ticket.DueDate != DateHelper.ToUtcTime(dto.DueDate))
             changes.Add("DueDate");
 
         return changes;

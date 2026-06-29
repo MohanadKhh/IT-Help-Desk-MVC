@@ -109,13 +109,13 @@ namespace ITHelpDesk.Application.Services
               <h3>SLA Breached</h3>
               <p>Ticket <strong>{ticket.Title}</strong> has passed its due date.</p>
               <p>Priority: {ticket.Priority}</p>
-              <p>Was due: {DateHelper.FormatCairoDate(ticket.DueDate)}</p>
+              <p>Was due: {DateHelper.FormatCairoTime(ticket.DueDate)}</p>
               """
                 : $"""
               <h3>SLA Warning</h3>
               <p>Ticket <strong>{ticket.Title}</strong> is approaching its due date.</p>
               <p>Priority: {ticket.Priority}</p>
-              <p>Due: {DateHelper.FormatCairoDate(ticket.DueDate)}</p>
+              <p>Due: {DateHelper.FormatCairoTime(ticket.DueDate)}</p>
               """;
 
             await _emailService.SendEmailAsync(assignedEmail, subject, body);
@@ -137,7 +137,7 @@ namespace ITHelpDesk.Application.Services
                         <h3>Ticket Still Unassigned</h3>
                         <p>Ticket <strong>{ticket.Title}</strong> has been unassigned for over the expected threshold for its priority.</p>
                         <p>Priority: {ticket.Priority}</p>
-                        <p>Created: {DateHelper.FormatCairoDate(ticket.CreatedAt)}</p>
+                        <p>Created: {DateHelper.FormatCairoTime(ticket.CreatedAt)}</p>
                         """;
 
             var adminEmails = await _userService.GetAdminEmailsAsync();

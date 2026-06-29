@@ -2,32 +2,37 @@
 {
     public static class DateHelper
     {
-        public static string FormatCairoDate(DateTime dateTime)
-        {
-            var cairoTimeZone =
-                TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+        private static readonly TimeZoneInfo CairoTimeZone = GetCairoTimeZone();
 
-            var cairoDate =
-                TimeZoneInfo.ConvertTimeFromUtc(dateTime, cairoTimeZone);
-
-            return cairoDate.ToString("dd MMM yyyy, hh:mm tt");
-        }
-        public static DateTime ToCairoDate(DateTime dateTime)
+        private static TimeZoneInfo GetCairoTimeZone()
         {
-            var cairoTimeZone =
-                TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-
-            return TimeZoneInfo.ConvertTimeFromUtc(dateTime, cairoTimeZone);
-        }
-        public static DateTime ToUtcDate(DateTime dateTime)
-        {
-            return dateTime.Kind switch
+            try
             {
-                DateTimeKind.Utc => dateTime,
-                DateTimeKind.Local => dateTime.ToUniversalTime(),
-                DateTimeKind.Unspecified => DateTime.SpecifyKind(dateTime, DateTimeKind.Local).ToUniversalTime(),
-                _ => dateTime.ToUniversalTime()
-            };
+                return TimeZoneInfo.FindSystemTimeZoneById("Africa/Cairo"); // Linux/.NET 6+, used by Azure
+            }
+            catch (TimeZoneNotFoundException)
+            {
+                return TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time"); // Windows fallback
+            }
+        }
+
+        public static DateTime ToUtcTime(DateTime dateTime)
+        {
+            // Always treat incoming "unspecified" datetime-local values as Cairo time,
+            // never as whatever the SERVER happens to think "Local" means.
+            var unspecified = DateTime.SpecifyKind(dateTime, DateTimeKind.Unspecified);
+            return TimeZoneInfo.ConvertTimeToUtc(unspecified, CairoTimeZone);
+        }
+
+        public static DateTime ToCairoTime(DateTime utcDateTime)
+        {
+            var utc = DateTime.SpecifyKind(utcDateTime, DateTimeKind.Utc);
+            return TimeZoneInfo.ConvertTimeFromUtc(utc, CairoTimeZone);
+        }
+
+        public static string FormatCairoTime(DateTime utcDateTime)
+        {
+            return ToCairoTime(utcDateTime).ToString("dd MMM yyyy, hh:mm tt");
         }
     }
 }
